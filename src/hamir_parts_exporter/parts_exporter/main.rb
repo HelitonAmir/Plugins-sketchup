@@ -20,7 +20,7 @@ module HamirTools
         return false
       end
 
-      "S".casecmp(component.get_attribute("dynamic_attributes","v_exportar_pecas_mdf"))
+      "S".casecmp(component.get_attribute("dynamic_attributes","v_exportar_pecas_mdf")) == 0
     end # is_exportable
 
     def self.export_parts_to_csv
@@ -60,7 +60,7 @@ module HamirTools
           if MDFPart.valid_thickness?(thickness)
             part_name = entity.name.empty? ? entity.definition.name : entity.name
 
-            #TODO: Coletar orientação do veio
+            #TODO: Coletar orientação do veio. Ainda não foi criado um atributo para isso.
             part = MDFPart.new(component_name, part_name, short_side, long_side, thickness, :IGNORE_GRAIN)
 
             parts << part

@@ -1,0 +1,51 @@
+  {
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Debug",
+        "type": "shell",
+        "command":  "open -a '/Applications/SketchUp 2017/SketchUp.app' --args -rdebug 'ide port=7000'",
+        "windows": {
+          "command": "&'C:/Program Files/SketchUp/SketchUp 2025/SketchUp/SketchUp.exe' -rdebug 'ide port=6123'"
+        },
+        "runOptions": {
+          "reevaluateOnRerun": false
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Exportar",
+        "type": "shell",
+        "command": "ruby",
+        "args": [
+          "scripts/exporter.rb"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "problemMatcher": []
+      }
+    ],
+    "inputs": [
+      {
+        "id": "sketchupVersion",
+        "type": "pickString",
+        "description": "SketchUp Version",
+        "options": [
+          "2025",
+          "2024",
+          "2023",
+          "2022",
+          "2021",
+          "2020",
+          "2019",
+          "2018",
+          "2017"
+        ],
+        "default": "2025"
+      }
+    ]
+  }

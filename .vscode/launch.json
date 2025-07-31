@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+
+    {
+      "name": "Attach to SketchUp",
+      "type": "Ruby",
+      "request": "attach",
+      "remoteHost": "127.0.0.1",
+      "remotePort": 6123,
+      "remoteWorkspaceRoot": "${workspaceFolder}"
+    }
+  ]
+}

@@ -2,7 +2,8 @@ require 'sketchup.rb'
 module HamirTools
   module ModulosMarcenaria
     class CabinetBoxTool
-     def activate
+
+      def activate
         @mouse_ip = Sketchup::InputPoint.new
         @picked_first_ip = Sketchup::InputPoint.new
         update_ui
@@ -68,6 +69,12 @@ module HamirTools
       def draw(view)
         draw_preview(view)
         @mouse_ip.draw(view) if @mouse_ip.display?
+      end
+
+      def getExtents
+        bounds = Geom::BoundingBox.new
+        bounds.add(picked_points)
+        bounds
       end
 
       private

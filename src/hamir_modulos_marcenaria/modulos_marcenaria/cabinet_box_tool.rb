@@ -1,57 +1,120 @@
+require 'sketchup.rb'
 module HamirTools
   module ModulosMarcenaria
     class CabinetBoxTool
-      def activate
-        @ip = Sketchup::InputPoint.new
-        @first_point = nil
+     def activate
+        @mouse_ip = Sketchup::InputPoint.new
+        @picked_first_ip = Sketchup::InputPoint.new
+        update_ui
+      end
+
+      def deactivate(view)
+        view.invalidate
+      end
+
+      def resume(view)
+        update_ui
+        view.invalidate
+      end
+
+      def suspend(view)
+        view.invalidate
+      end
+
+      def onCancel(reason, view)
+        reset_tool
+        view.invalidate
       end
 
       def onMouseMove(flags, x, y, view)
-        @ip.pick(view, x, y)
-        view.invalidate if @ip.display?
+        if picked_first_point?
+          @mouse_ip.pick(view, x, y, @picked_first_ip)
+        else
+          @mouse_ip.pick(view, x, y)
+        end
+        view.tooltip = @mouse_ip.tooltip if @mouse_ip.valid?
+        view.invalidate
       end
 
-      def onButtonDown(flags, x, y, view)
-        if @first_point.nil?
-          @ip.pick(view, x, y)
-          @first_point = @ip.position
-          view.tooltip = "Clique novamente para definir o tamanho do caixote."
+      def onLButtonDown(flags, x, y, view)
+        if picked_first_point? && create_edge > 0
+          # When the user have picked a start point and then picks another point
+          # we create an edge and try to create new faces from that edge.
+          # Like the native tool we reset the tool if it created new faces.
+          reset_tool
         else
-          @ip.pick(view, x, y)
-          @second_point = @ip.position
-          create_cabinet_box(@first_point, @second_point, Sketchup.active_model)
-          @first_point = nil
-          view.tooltip = "Caixote criado."
-          Sketchup.active_model.select_tool(nil) # volta para a ferramenta padrão
+          # If no face was created we let the user chain new edges to the last
+          # input point.
+          @picked_first_ip.copy!(@mouse_ip)
         end
+
+        update_ui
+        view.invalidate
+      end
+
+      # Here we have hard coded a special ID for the pencil cursor in SketchUp.
+      # Normally you would use `UI.create_cursor(cursor_path, 0, 0)` instead
+      # with your own custom cursor bitmap:
+      #
+      #   CURSOR_PENCIL = UI.create_cursor(cursor_path, 0, 0)
+      CURSOR_PENCIL = 632
+      def onSetCursor
+        # Note that `onSetCursor` is called frequently so you should not do much
+        # work here. At most you switch between different cursor representing
+        # the state of the tool.
+        UI.set_cursor(CURSOR_PENCIL)
       end
 
       def draw(view)
-       return unless @first_point && @ip.valid?
-
-       view.set_color_from_line(@first_point, @ip.position)
-       view.draw_line(@first_point, @ip.position)
+        draw_preview(view)
+        @mouse_ip.draw(view) if @mouse_ip.display?
       end
 
-      def create_cabinet_box(p1, p2, model)
-        entities = model.active_entities
-        group = entities.add_group
-        cabinet_box = group.entities;
+      private
 
-        x1, y1 = p1.x, p1.y
-        x2, y2 = p2.x, p2.y
-        z = p1.z
-
-        height = 720.mm
-
-        pt1 = Geom::Point3d.new(x1, y1, z)
-        pt2 = Geom::Point3d.new(x2, y1, z)
-        pt3 = Geom::Point3d.new(x2, y2, z)
-        pt4 = Geom::Point3d.new(x1, y2, z)
-
-        base = [pt1, pt2, pt3, pt4]
-        face = model.active_entities.add_face(base)
-        face.pushpull(height)
+      def update_ui
+        if picked_first_point?
+          Sketchup.status_text = 'Select end point.'
+        else
+          Sketchup.status_text = 'Select start point.'
+        end
       end
+
+      def reset_tool
+        @picked_first_ip.clear
+        update_ui
+      end
+
+      def picked_first_point?
+        @picked_first_ip.valid?
+      end
+
+      def picked_points
+        points = []
+        points << @picked_first_ip.position if picked_first_point?
+        points << @mouse_ip.position if @mouse_ip.valid?
+        points
+      end
+
+      def draw_preview(view)
+        points = picked_points
+        return unless points.size == 2
+        view.set_color_from_line(*points)
+        view.line_width = 1
+        view.line_stipple = ''
+        view.draw(GL_LINES, points)
+      end
+
+      # Returns the number of created faces.
+      def create_edge
+        model = Sketchup.active_model
+        model.start_operation('Edge', true)
+        edge = model.active_entities.add_line(picked_points)
+        num_faces = edge.find_faces || 0 # API returns nil instead of 0.
+        model.commit_operation
+
+        num_faces
+      end
+    end # class CabinetBoxTool
   end # module ModulosMarcenaria
 end # module HamirTools

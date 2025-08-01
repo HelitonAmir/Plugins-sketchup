@@ -1,10 +1,7 @@
 
 
-    require 'sketchup.rb'
-require 'csv'
-require_relative 'utils'
-require_relative 'corte_cloud_utils'
-require_relative 'mdf_part'
+require 'sketchup.rb'
+require_relative 'cabinet_box_tool'
 
 module HamirTools
   module ModulosMarcenaria
@@ -18,7 +15,7 @@ module HamirTools
     end
 
     def self.create_module(tipo)
-      Sketchup.active_model.select_tool(HamirTools::CabinetBoxTool.new)
+      Sketchup.active_model.select_tool(HamirTools::ModulosMarcenaria::CabinetBoxTool.new)
     end
   end # module ModulosMarcenaria
 end # module HamirTools

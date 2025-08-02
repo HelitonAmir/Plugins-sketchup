@@ -6,7 +6,7 @@ module HamirTools
         @cursor_id = nil
         # Load vector cursor format depending on platform.
         ext = Sketchup.platform == :platform_win ? 'svg' : 'pdf'
-        cursor_path = File.join(__dir__, "icon_cabinet_box.#{ext}")
+        cursor_path = File.join(__dir__, "mouse_cursors", "cabinet_box.#{ext}")
         @cursor_id = UI.create_cursor(cursor_path, 4, 6)
       end
 

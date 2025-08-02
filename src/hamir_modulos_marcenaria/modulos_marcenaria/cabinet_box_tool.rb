@@ -2,6 +2,13 @@ require 'sketchup.rb'
 module HamirTools
   module ModulosMarcenaria
     class CabinetBoxTool
+      def initialize
+        @cursor_id = nil
+        # Load vector cursor format depending on platform.
+        ext = Sketchup.platform == :platform_win ? 'svg' : 'pdf'
+        cursor_path = File.join(__dir__, "icon_cabinet_box.#{ext}")
+        @cursor_id = UI.create_cursor(cursor_path, 4, 6)
+      end
 
       def activate
         @mouse_ip = Sketchup::InputPoint.new
@@ -58,12 +65,12 @@ module HamirTools
       # with your own custom cursor bitmap:
       #
       #   CURSOR_PENCIL = UI.create_cursor(cursor_path, 0, 0)
-      CURSOR_PENCIL = 632
+      #CURSOR_PENCIL = 632
       def onSetCursor
         # Note that `onSetCursor` is called frequently so you should not do much
         # work here. At most you switch between different cursor representing
         # the state of the tool.
-        UI.set_cursor(CURSOR_PENCIL)
+        UI.set_cursor(@cursor_id)
       end
 
       def draw(view)

@@ -112,9 +112,14 @@ module HamirTools
 
       def draw_preview(view)
           return unless @mouse_ip.valid?
+          # se tem o primeiro ponto, então o inicio parte dele
+          # se não, o inicio parte do mouse_ip
 
-  pt1 = @mouse_ip.position
-  pt2 = pt1.offset(Geom::Vector3d.new(10, 10, 0))
+          # se tem o primeiro ponto, então o fim parte do mouse_ip
+          # se não, o fim parte do mouse_ip + 10,10
+
+  pt1 = @picked_first_ip.valid? ? @picked_first_ip.position : @mouse_ip.position
+  pt2 = @picked_first_ip.valid? ? @mouse_ip.position : pt1.offset(Geom::Vector3d.new(10, 10, 0))
 
   # Cria um retângulo no plano Z com base em dois pontos opostos
   vec_x = Geom::Vector3d.new(pt2.x - pt1.x, 0, 0)

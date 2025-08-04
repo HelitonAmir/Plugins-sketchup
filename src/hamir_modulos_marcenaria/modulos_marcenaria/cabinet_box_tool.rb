@@ -7,7 +7,7 @@ module HamirTools
         # Load vector cursor format depending on platform.
         ext = Sketchup.platform == :platform_win ? 'svg' : 'pdf'
         cursor_path = File.join(__dir__, "mouse_cursors", "cabinet_box.#{ext}")
-        @cursor_id = UI.create_cursor(cursor_path, 4, 6)
+        @cursor_id = UI.create_cursor(cursor_path, 2, 38)
       end
 
       def activate
@@ -111,12 +111,29 @@ module HamirTools
       end
 
       def draw_preview(view)
-        points = picked_points
-        return unless points.size == 2
-        view.set_color_from_line(*points)
-        view.line_width = 1
-        view.line_stipple = ''
-        view.draw(GL_LINES, points)
+          return unless @mouse_ip.valid?
+
+  pt1 = @mouse_ip.position
+  pt2 = pt1.offset(Geom::Vector3d.new(10, 10, 0))
+
+  # Cria um retângulo no plano Z com base em dois pontos opostos
+  vec_x = Geom::Vector3d.new(pt2.x - pt1.x, 0, 0)
+  vec_y = Geom::Vector3d.new(0, pt2.y - pt1.y, 0)
+
+  corner1 = pt1
+  corner2 = pt1.offset(vec_x)
+  corner3 = pt2
+  corner4 = pt1.offset(vec_y)
+
+  rectangle = [corner1, corner2, corner3, corner4, corner1]
+
+  view.line_stipple = ''
+  view.line_width = 2
+  view.drawing_color = 'blue'
+  view.draw(GL_LINE_STRIP, rectangle)
+
+  #@first_ip.draw(view)
+  @mouse_ip.draw(view)
       end
 
       # Returns the number of created faces.
